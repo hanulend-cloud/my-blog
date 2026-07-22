@@ -2,37 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Blog - 일상 블로그</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>인원 카운터</title>
     <style>
-        :root {
-            --bg: #f5f5f5;
-            --card-bg: #ffffff;
-            --text: #333333;
-            --text-light: #777777;
-            --accent: #ff6b6b;
-            --accent-hover: #ee5a5a;
-            --tag-bg: #fff0f0;
-            --tag-text: #ff6b6b;
-            --border: #eee;
-            --nav-bg: #ffffff;
-            --shadow: rgba(0, 0, 0, 0.08);
-        }
-
-        [data-theme="dark"] {
-            --bg: #1a1a2e;
-            --card-bg: #16213e;
-            --text: #e0e0e0;
-            --text-light: #a0a0a0;
-            --accent: #ff6b6b;
-            --accent-hover: #ff8585;
-            --tag-bg: #2a1a1a;
-            --tag-text: #ff8585;
-            --border: #2a2a4a;
-            --nav-bg: #0f3460;
-            --shadow: rgba(0, 0, 0, 0.3);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -40,321 +12,264 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            transition: all 0.3s ease;
-            line-height: 1.6;
+            background: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
         }
 
-        /* 네비게이션 */
-        nav {
-            background: var(--nav-bg);
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            transition: all 0.3s ease;
+        #camera-view {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
-        .logo {
-            font-size: 1.5em;
-            font-weight: 700;
-            color: var(--accent);
-            text-decoration: none;
+        #no-camera {
+            width: 100%;
+            height: 100%;
+            background: #888;
+            display: none;
         }
 
-        .nav-links {
-            display: flex;
-            gap: 25px;
-            align-items: center;
+        /* 좌상단 카운트 패널 */
+        #count-panel {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.82);
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 8px;
+            min-width: 140px;
+            z-index: 10;
         }
 
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text);
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-
-        .theme-btn {
-            background: none;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.3s;
+        .count-row {
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .theme-btn:hover {
-            border-color: var(--accent);
-            transform: rotate(30deg);
-        }
-
-        /* 히어로 섹션 */
-        .hero {
-            text-align: center;
-            padding: 80px 20px;
-            background: linear-gradient(135deg, var(--accent) 0%, #ffa07a 100%);
-            color: white;
-        }
-
-        .hero h1 {
-            font-size: 3em;
-            margin-bottom: 15px;
-        }
-
-        .hero p {
+            gap: 8px;
             font-size: 1.3em;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
+            font-weight: bold;
+            margin-bottom: 4px;
         }
 
-        /* 메인 컨텐츠 */
-        .main {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
+        .arrow-down { color: #00e676; font-size: 1.1em; }
+        .arrow-up   { color: #ff4444; font-size: 1.1em; }
+
+        .count-divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.35);
+            margin: 8px 0;
         }
 
-        .section-title {
-            font-size: 1.8em;
-            margin-bottom: 30px;
-            color: var(--text);
+        .total-row {
+            font-size: 1.25em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* 우상단 현재 인원 */
+        #current-panel {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.82);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        /* 카운팅 라인 */
+        #counting-line {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            transform: translateY(-50%);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .line-dashed {
+            border-top: 3px dashed #ff3333;
+            width: 100%;
+            position: relative;
+        }
+
+        .line-label {
+            position: absolute;
+            left: 14px;
+            top: -22px;
+            color: #ff3333;
+            font-size: 0.9em;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* 하단 버튼 영역 */
+        #bottom-controls {
+            position: fixed;
+            bottom: 24px;
+            right: 16px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 10;
+            align-items: flex-end;
+        }
+
+        .btn-group {
+            display: flex;
             gap: 10px;
         }
 
-        /* 블로그 카드 */
-        .blog-grid {
-            display: grid;
-            gap: 25px;
-        }
-
-        .blog-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 20px var(--shadow);
-            transition: all 0.3s ease;
+        .count-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.6em;
+            font-weight: bold;
             cursor: pointer;
-            border-left: 4px solid var(--accent);
-        }
-
-        .blog-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 30px var(--shadow);
-        }
-
-        .card-date {
-            font-size: 0.85em;
-            color: var(--text-light);
-            margin-bottom: 10px;
-        }
-
-        .card-title {
-            font-size: 1.4em;
-            margin-bottom: 12px;
-            color: var(--text);
-        }
-
-        .card-content {
-            color: var(--text-light);
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .card-tags {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            transition: transform 0.1s;
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .tag {
-            background: var(--tag-bg);
-            color: var(--tag-text);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 600;
-        }
-
-        /* 푸터 */
-        footer {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-light);
-            border-top: 1px solid var(--border);
-            margin-top: 60px;
-        }
-
-        footer a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        .footer-links {
-            display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 20px;
-            margin-top: 15px;
+            flex-direction: column;
         }
 
-        .footer-link {
-            color: white;
-            text-decoration: none;
-            padding: 10px 24px;
+        .count-btn:active { transform: scale(0.92); }
+
+        .btn-down {
+            background: #00c853;
+            color: #fff;
+        }
+
+        .btn-up {
+            background: #ff3333;
+            color: #fff;
+        }
+
+        .btn-label {
+            font-size: 0.45em;
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        .reset-btn {
+            background: rgba(60, 60, 80, 0.88);
+            color: #fff;
+            border: none;
+            padding: 12px 28px;
             border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
 
-        .footer-link.naver { background: #03C75A; }
-        .footer-link.naver:hover { background: #02b350; transform: translateY(-2px); }
-        .footer-link.google { background: #4285F4; }
-        .footer-link.google:hover { background: #3367d6; transform: translateY(-2px); }
+        .reset-btn:active { transform: scale(0.95); }
 
-        /* 모바일 반응형 */
-        @media (max-width: 768px) {
-            nav { padding: 15px 20px; }
-            .nav-links { gap: 15px; }
-            .hero h1 { font-size: 2em; }
-            .hero p { font-size: 1.1em; }
-            .blog-card { padding: 20px; }
-            .card-title { font-size: 1.2em; }
+        #cam-overlay {
+            position: fixed;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            color: #ccc;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.82em;
+            z-index: 10;
+            white-space: nowrap;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="#" class="logo">Daily Blog</a>
-        <div class="nav-links">
-            <a href="#">홈</a>
-            <a href="#">일상</a>
-            <a href="#">맛집</a>
-            <a href="#">여행</a>
-            <button class="theme-btn" id="themeBtn" aria-label="테마 변경">🌙</button>
-        </div>
-    </nav>
 
-    <div class="hero">
-        <h1>Daily Blog</h1>
-        <p>일상의 소소한 이야기들을 기록합니다</p>
+    <video id="camera-view" autoplay playsinline muted></video>
+    <canvas id="no-camera"></canvas>
+
+    <div id="count-panel">
+        <div class="count-row">
+            <span class="arrow-down">↓</span>
+            <span>아래:</span>
+            <span id="count-down">0</span>
+        </div>
+        <div class="count-row">
+            <span class="arrow-up">↑</span>
+            <span>위:</span>
+            <span id="count-up">0</span>
+        </div>
+        <hr class="count-divider">
+        <div class="total-row">합계: <span id="count-total">0</span></div>
     </div>
 
-    <main class="main">
-        <h2 class="section-title">최근 글</h2>
+    <div id="current-panel">현재: <span id="count-current">0</span>명</div>
 
-        <div class="blog-grid">
-            <article class="blog-card">
-                <div class="card-date">2026년 2월 7일</div>
-                <h3 class="card-title">오늘 드디어 블로그를 시작했다!</h3>
-                <p class="card-content">
-                    드디어 나만의 블로그를 만들었다. GitHub Pages로 배포까지 완료!
-                    앞으로 일상 이야기, 맛집 후기, 여행기 등 다양한 글을 올릴 예정이다.
-                    꾸준히 기록하는 습관을 들여보자.
-                </p>
-                <div class="card-tags">
-                    <span class="tag">#시작</span>
-                    <span class="tag">#블로그</span>
-                    <span class="tag">#일상</span>
-                </div>
-            </article>
-
-            <article class="blog-card">
-                <div class="card-date">2026년 2월 6일</div>
-                <h3 class="card-title">점심에 먹은 파스타가 너무 맛있었다</h3>
-                <p class="card-content">
-                    회사 근처에 새로 오픈한 이탈리안 레스토랑에 갔는데
-                    크림 파스타가 정말 미쳤다. 면이 알덴테로 딱 맞고,
-                    소스도 너무 진하지 않아서 끝까지 맛있게 먹었다. 또 가야지!
-                </p>
-                <div class="card-tags">
-                    <span class="tag">#맛집</span>
-                    <span class="tag">#파스타</span>
-                    <span class="tag">#점심</span>
-                </div>
-            </article>
-
-            <article class="blog-card">
-                <div class="card-date">2026년 2월 5일</div>
-                <h3 class="card-title">주말 한강 산책 후기</h3>
-                <p class="card-content">
-                    날씨가 좋아서 한강공원에 다녀왔다. 겨울이지만 햇살이 따뜻해서
-                    산책하기 딱 좋았다. 치킨이랑 커피 사서 벤치에 앉아 먹었는데
-                    이런 소소한 행복이 진짜 행복인 것 같다.
-                </p>
-                <div class="card-tags">
-                    <span class="tag">#한강</span>
-                    <span class="tag">#산책</span>
-                    <span class="tag">#주말</span>
-                </div>
-            </article>
-
-            <article class="blog-card">
-                <div class="card-date">2026년 2월 4일</div>
-                <h3 class="card-title">넷플릭스 추천: 요즘 빠진 드라마</h3>
-                <p class="card-content">
-                    요즘 퇴근 후에 넷플릭스 보는 재미로 산다.
-                    이번에 새로 나온 시리즈가 너무 재미있어서 밤새 정주행할 뻔했다.
-                    스포 없이 말하자면... 반전이 미쳤다. 강추!
-                </p>
-                <div class="card-tags">
-                    <span class="tag">#넷플릭스</span>
-                    <span class="tag">#드라마</span>
-                    <span class="tag">#추천</span>
-                </div>
-            </article>
+    <div id="counting-line">
+        <div class="line-dashed">
+            <span class="line-label">— 카운팅 라인 —</span>
         </div>
-    </main>
+    </div>
 
-    <footer>
-        <p>Daily Blog &copy; 2026 | Made with ❤️</p>
-        <div class="footer-links">
-            <a href="https://www.naver.com" class="footer-link naver" target="_blank">N Naver</a>
-            <a href="https://www.google.com" class="footer-link google" target="_blank">G Google</a>
+    <div id="bottom-controls">
+        <div class="btn-group">
+            <button class="count-btn btn-down" onclick="countDown()">
+                ↓
+                <span class="btn-label">아래</span>
+            </button>
+            <button class="count-btn btn-up" onclick="countUp()">
+                ↑
+                <span class="btn-label">위</span>
+            </button>
         </div>
-    </footer>
+        <button class="reset-btn" onclick="resetAll()">초기화</button>
+    </div>
+
+    <div id="cam-overlay">카메라 권한을 허용하면 실시간 화면이 표시됩니다</div>
 
     <script>
-        const themeBtn = document.getElementById('themeBtn');
-        const html = document.documentElement;
+        let down = 0, up = 0;
 
-        const saved = localStorage.getItem('blog-theme');
-        if (saved === 'dark') {
-            html.setAttribute('data-theme', 'dark');
-            themeBtn.textContent = '☀️';
-        } else if (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            html.setAttribute('data-theme', 'dark');
-            themeBtn.textContent = '☀️';
+        function update() {
+            document.getElementById('count-down').textContent = down;
+            document.getElementById('count-up').textContent = up;
+            document.getElementById('count-total').textContent = down + up;
+            document.getElementById('count-current').textContent = down - up;
         }
 
-        themeBtn.addEventListener('click', () => {
-            const isDark = html.getAttribute('data-theme') === 'dark';
-            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            themeBtn.textContent = isDark ? '🌙' : '☀️';
-            localStorage.setItem('blog-theme', isDark ? 'light' : 'dark');
-        });
+        function countDown() { down++; update(); }
+        function countUp()   { up++;   update(); }
+        function resetAll()  { down = 0; up = 0; update(); }
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+                });
+                document.getElementById('camera-view').srcObject = stream;
+            } catch (e) {
+                document.getElementById('camera-view').style.display = 'none';
+                const canvas = document.getElementById('no-camera');
+                canvas.style.display = 'block';
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#999';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                document.getElementById('cam-overlay').style.display = 'block';
+            }
+        }
+
+        startCamera();
     </script>
 </body>
 </html>
